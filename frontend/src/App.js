@@ -14,11 +14,33 @@ function App() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dueDate, setDueDate] = useState("");
 
   // TODO 排序
+  // 排序：未完成在前，同一类里按截止日期从近到远（无截止日期排在后面）
   const sortTodos = (list) => {
-  return [...list].sort((a, b) => Number(a.completed) - Number(b.completed));
+    return [...list].sort((a, b) => {
+      // 1. 先按 completed 排序：false(0) 在前，true(1) 在后
+      if (a.completed !== b.completed) {
+        return Number(a.completed) - Number(b.completed);
+      }
+
+      // 2. 再按截止日期排序（假设字段名为 due_date，字符串格式 YYYY-MM-DD）
+      const ad = a.due_date || "";
+      const bd = b.due_date || "";
+
+      // 都没有截止日期
+      if (!ad && !bd) return 0;
+      // a 没有，b 有 -> a 靠后
+      if (!ad) return 1;
+      // a 有，b 没有 -> a 靠前
+      if (!bd) return -1;
+
+      // 都有截止日期：字符串比较即可（YYYY-MM-DD 是字典序=时间顺序）
+      return ad.localeCompare(bd);
+    });
   };
+
 
 
   useEffect(() => {
@@ -58,15 +80,23 @@ function App() {
         body: JSON.stringify({
           title,
           description,
+          due_date: dueDate || null,
         }),
       });
 
       if (!res.ok) throw new Error("添加失败");
 
-      const newTodo = await res.json();
+      const saved = await res.json();
+
+      const newTodo = {
+        ...saved,
+        due_date: dueDate || null,
+      };
+
       setTodos(sortTodos([newTodo, ...todos]));
       setTitle("");
       setDescription("");
+      setDueDate("");
 
     } catch (error) {
       alert("系统错误：添加失败，请稍后再试。");
@@ -169,6 +199,20 @@ function App() {
             />
           </div>
 
+          {/* 截止日期 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              截止日期（可选）
+            </label>
+            <input
+              type="date"
+              className="w-full border rounded-lg px-3 py-2 text-sm
+                         focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
+
           <button
             type="submit"
             className={
@@ -234,6 +278,13 @@ function App() {
                       {todo.description && (
                         <p className="text-xs text-gray-600 mt-1">
                           {todo.description}
+                        </p>
+                      )}
+
+                      {/* 截止日期展示 */}
+                      {todo.due_date && (
+                        <p className="text-xs text-gray-500 mt-1">
+                          截止日期：{todo.due_date}
                         </p>
                       )}
                     </div>

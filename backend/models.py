@@ -8,3 +8,5 @@ class TodoModel(Base):
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     completed = Column(Boolean, nullable=False, default=False)
+    due_date = Column(String(10), nullable=True)
+    

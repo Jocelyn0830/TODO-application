@@ -15,6 +15,7 @@ class TodoOut(BaseModel):
     title: str
     description: str | None = None
     completed: bool
+    due_date: str | None = None
 
     class Config:
         orm_mode = True
@@ -22,11 +23,14 @@ class TodoOut(BaseModel):
 class TodoCreate(BaseModel):
     title: str
     description: str | None = None
+    due_date: str | None = None
 
 class TodoUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
     completed: bool | None = None
+    due_date: str | None = None
+
 
 # -----------------------
 # 初始化应用
@@ -67,19 +71,20 @@ def init_db():
                     title="买菜",
                     description="鸡蛋、番茄和牛奶。",
                     completed=False,
+                    due_date="2025-11-30",
                 ),
                 models.TodoModel(
                     title="锻炼 30 分钟",
                     description="简单跑步或拉伸。",
                     completed=True,
-
+                    due_date="2025-11-20",
                 ),
                 models.TodoModel(
                     title="回复工作邮件",
                     description="",
                     completed=False,
+                    due_date=None,
                 ),
-
             ]
 
             db.add_all(todos)
@@ -91,7 +96,6 @@ def init_db():
 
 # 初始化数据库
 init_db()
-
 
 # -----------------------
 # Routes
@@ -107,7 +111,14 @@ def read_todos(db: Session = Depends(get_db)):
     """
     从 SQLite 数据库中读取所有 todo。
     """
-    todos = db.query(models.TodoModel).order_by(models.TodoModel.completed.asc()).all()
+
+    # 后端先粗排序，前端再精排序
+    todos = (
+        db.query(models.TodoModel)
+        .order_by(models.TodoModel.completed.asc())
+        .all()
+    )
+
     return todos
 
 
@@ -118,6 +129,7 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
         title=todo.title,
         description=todo.description,
         completed=False,
+        due_date=todo.due_date,
     )
     db.add(new_todo)
     db.commit()
@@ -138,6 +150,8 @@ def update_todo(todo_id: int, todo: TodoUpdate, db: Session = Depends(get_db)):
         item.description = todo.description
     if todo.completed is not None:
         item.completed = todo.completed
+    if todo.due_date is not None:
+        item.due_date = todo.due_date
 
     db.commit()
     db.refresh(item)
