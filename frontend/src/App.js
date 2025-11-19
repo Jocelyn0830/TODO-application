@@ -1,4 +1,5 @@
 // TODO: maybe improve sorting
+// TODO: backend connection
 
 import { useState } from "react";
 
@@ -13,13 +14,13 @@ const initialTodos = [
     id: 2,
     title: "锻炼 30 分钟",
     description: "简单跑步或拉伸。",
-    completed: true,
+    completed: false,
   },
   {
     id: 3,
     title: "回复工作邮件",
     description: "",
-    completed: false,
+    completed: true,
   },
 ];
 
