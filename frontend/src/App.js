@@ -46,37 +46,75 @@ function App() {
     fetchTodos();
   }, []);
 
-  // 添加 TODO
-  const handleAddTodo = (e) => {
+  // 调用后端添加 TODO
+  const handleAddTodo = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
 
-    const newTodo = {
-      id: Date.now(),
-      title,
-      description,
-      completed: false,
-    };
+    try {
+      const res = await fetch(`${API_BASE_URL}/todos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title,
+          description,
+        }),
+      });
 
-    setTodos(sortTodos([newTodo, ...todos]));
-    setTitle("");
-    setDescription("");
+      if (!res.ok) throw new Error("添加失败");
+
+      const newTodo = await res.json();
+      setTodos(sortTodos([newTodo, ...todos]));
+      setTitle("");
+      setDescription("");
+
+    } catch (error) {
+      alert("系统错误：添加失败，请稍后再试。");
+    }
   };
 
-  // 切换完成状态
-  const toggleCompleted = (id) => {
-    setTodos(
-      sortTodos(
-        todos.map((todo) =>
-          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  // 调用后端update：切换完成状态
+  const toggleCompleted = async (id, current) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          completed: !current,
+        }),
+      });
+
+      if (!res.ok) throw new Error("更新失败");
+
+      const updated = await res.json();
+
+      setTodos(
+        sortTodos(
+          todos.map((todo) =>
+            todo.id === id ? updated : todo
+          )
         )
-      )
-    );
+      );
+
+    } catch (error) {
+      alert("系统错误：更新失败，请稍后再试。");
+    }
   };
 
-  // 删除 TODO
-  const deleteTodo = (id) => {
-    setTodos(sortTodos(todos.filter((todo) => todo.id !== id)));
+  // 调用后端DELETE：删除 TODO
+  const deleteTodo = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/todos/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("删除失败");
+
+      setTodos(sortTodos(todos.filter((todo) => todo.id !== id)));
+
+    } catch (error) {
+      alert("系统错误：删除失败，请稍后再试。");
+    }
   };
 
   // ------------------------
@@ -170,7 +208,7 @@ function App() {
                 <input
                   type="checkbox"
                   checked={todo.completed}
-                  onChange={() => toggleCompleted(todo.id)}
+                  onChange={() => toggleCompleted(todo.id, todo.completed)}
                   className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
                 />
 
