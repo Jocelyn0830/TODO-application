@@ -122,7 +122,9 @@ function App() {
   // ------------------------
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-xl shadow-lg">
+        <div
+          className="w-full max-w-3xl h-[92vh] mx-auto p-8 bg-white rounded-2xl shadow-xl flex flex-col"
+        >
 
         {/* 标题 */}
         <h1 className="text-2xl font-bold mb-4 text-gray-800">
@@ -186,70 +188,69 @@ function App() {
           待办事项：
         </h2>
 
-        {/* 后端加载失败/没有任何数据 */}
+        {/* 列表区域：固定高度 + 内部滚动 */}
+        <div className="flex-1 min-h-0 border rounded-lg p-3 bg-gray-50">
+          {!loading && todos.length === 0 && (
+            <div className="text-sm text-gray-500">
+              当前没有任何待办事项。
+            </div>
+          )}
 
-        {!loading && todos.length === 0 && (
+          <div className="mt-1 h-full max-h-full overflow-y-auto pr-1">
+            <ul className="space-y-3">
+              {todos.map((todo) => (
+                <li
+                  key={todo.id}
+                  className="flex items-start justify-between border rounded-lg px-3 py-2 bg-white"
+                >
+                  <div className="flex items-start space-x-3">
+                    <input
+                      type="checkbox"
+                      checked={todo.completed}
+                      onChange={() => toggleCompleted(todo.id, todo.completed)}
+                      className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
 
-          <div className="text-sm text-gray-500">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={
+                            "font-medium text-sm " +
+                            (todo.completed
+                              ? "line-through text-gray-400"
+                              : "text-gray-800")
+                          }
+                        >
+                          {todo.title}
+                        </span>
+                        {todo.completed && (
+                          <span className="text-xs text-green-600 bg-green-50 
+                                           border border-green-200 rounded px-2 py-0.5">
+                            已完成
+                          </span>
+                        )}
+                      </div>
 
-            当前没有任何待办事项。
-
-          </div>
-
-        )}
-
-        <ul className="space-y-3">
-          {todos.map((todo) => (
-            <li
-              key={todo.id}
-              className="flex items-start justify-between border rounded-lg px-3 py-2"
-            >
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  checked={todo.completed}
-                  onChange={() => toggleCompleted(todo.id, todo.completed)}
-                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                />
-
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <span
-                      className={
-                        "font-medium text-sm " +
-                        (todo.completed
-                          ? "line-through text-gray-400"
-                          : "text-gray-800")
-                      }
-                    >
-                      {todo.title}
-                    </span>
-                    {todo.completed && (
-                      <span className="text-xs text-green-600 bg-green-50 
-                                       border border-green-200 rounded px-2 py-0.5">
-                        已完成
-                      </span>
-                    )}
+                      {todo.description && (
+                        <p className="text-xs text-gray-600 mt-1">
+                          {todo.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  {todo.description && (
-                    <p className="text-xs text-gray-600 mt-1">
-                      {todo.description}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => deleteTodo(todo.id)}
-                className="text-xs text-red-500 hover:text-red-700"
-              >
-                删除
-              </button>
-            </li>
-          ))}
-        </ul>
+                  <button
+                    type="button"
+                    onClick={() => deleteTodo(todo.id)}
+                    className="text-xs text-red-500 hover:text-red-700"
+                  >
+                    删除
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
 
       </div>
     </div>
