@@ -1,42 +1,50 @@
 // TODO: maybe improve sorting
 // TODO: backend connection
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-const initialTodos = [
-  {
-    id: 1,
-    title: "买菜",
-    description: "鸡蛋、番茄和牛奶。",
-    completed: false,
-  },
-  {
-    id: 2,
-    title: "锻炼 30 分钟",
-    description: "简单跑步或拉伸。",
-    completed: false,
-  },
-  {
-    id: 3,
-    title: "回复工作邮件",
-    description: "",
-    completed: true,
-  },
-];
+// uvicorn默认端口8000
+const API_BASE_URL = "http://127.0.0.1:8000";
 
 function App() {
   // ------------------------
   // State 管理
   // ------------------------
-  const [todos, setTodos] = useState(initialTodos);
+  const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [loading, setLoading] = useState(true);
 
   // TODO 排序
   const sortTodos = (list) => {
   return [...list].sort((a, b) => Number(a.completed) - Number(b.completed));
   };
 
+
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/todos`);
+        if (!res.ok) {
+          throw new Error(`状态码: ${res.status}`);
+        }
+
+        const data = await res.json();
+        setTodos(sortTodos(data));
+      } catch (err) {
+        console.error("加载后端数据失败：", err);
+
+        // 弹窗提醒用户后端错误
+        alert("系统错误：无法加载待办事项，请稍后再试。");
+
+        // 不显示数据
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTodos();
+  }, []);
 
   // 添加 TODO
   const handleAddTodo = (e) => {
@@ -83,6 +91,14 @@ function App() {
           TODO List
         </h1>
 
+        {/* 如果还在加载 */}
+
+        {loading && (
+
+          <p className="text-sm text-gray-500 mb-4">正在加载待办事项...</p>
+
+        )}
+
         {/* 表单区域 */}
         <form onSubmit={handleAddTodo} className="mb-6 space-y-3">
           <div>
@@ -95,6 +111,7 @@ function App() {
               placeholder="例如: 和朋友约吃饭"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -120,7 +137,7 @@ function App() {
                 ? "bg-blue-600 hover:bg-blue-700"
                 : "bg-blue-300 cursor-not-allowed")
             }
-            disabled={!title.trim()}
+            disabled={!title.trim() || loading}
           >
             添加TODO
           </button>
@@ -130,6 +147,18 @@ function App() {
         <h2 className="text-sm font-semibold text-gray-700 mb-2">
           待办事项：
         </h2>
+
+        {/* 后端加载失败/没有任何数据 */}
+
+        {!loading && todos.length === 0 && (
+
+          <div className="text-sm text-gray-500">
+
+            当前没有任何待办事项。
+
+          </div>
+
+        )}
 
         <ul className="space-y-3">
           {todos.map((todo) => (
