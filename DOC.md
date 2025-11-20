@@ -33,7 +33,7 @@
     - 语法简洁
     - 自带 Swagger (/docs)，方便调试
     - 自带 Pydantic 校验，API 数据结构清晰
-    - 个人用使用经历
+    - 个人有使用经历
 
   - 替代方案对比：
 
@@ -175,6 +175,7 @@ http://localhost:3000
 - 后端
 ```
 cd TODO-application
+pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
