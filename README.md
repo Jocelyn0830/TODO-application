@@ -17,6 +17,7 @@ http://localhost:3000
 ### 后端
 ```
 cd TODO-application
+pip install -r backend/requirements.txt
 uvicorn backend.main:app --reload
 ```
 
