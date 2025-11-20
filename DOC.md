@@ -103,7 +103,7 @@ project/
 - frontend/App.js
     - 加载后端数据
     - 表单输入：标题/描述/截止日期
-    - 调用 API: POST, PUT, DELETE
+    - 调用 API: POST, PUT, DELETE, GET
     - 排序逻辑：未完成在前 + 截止日期从近到远
     - UI 构建（Tailwind）
 
